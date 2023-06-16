@@ -5,8 +5,8 @@ from sklearn.model_selection import train_test_split
 import plotly.graph_objects as go
 import pandas as pd
 import yfinance as yf
-import datetime
 from datetime import date, timedelta
+from yahoo_finance_data_fetch import getDataForDay, getLastNDaysForSymbol
 
 
 print(
@@ -21,24 +21,9 @@ print(
 '''
 )
 
-# Get the data from yahoo finance and print the last 5
-today = date.today()
 
-d1 = today.strftime("%Y-%m-%d")
-end_date = d1
-
-d2 = date.today() - timedelta(days=5000)
-d2 = d2.strftime("%Y-%m-%d")
-start_date = d2
-
-data = yf.download('AAPL', start=start_date, end=end_date, progress=False)
-data["Date"] = data.index
-
-data = data[["Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"]]
-data.reset_index(drop=True, inplace=True)
-# data.tail()  # returns the last 5
-print(f"==>> data.tail(): {data.tail()}")
-
+data = getLastNDaysForSymbol('AAPL', 5000)
+# exit(0)
 
 print(
     '''
@@ -140,6 +125,13 @@ model.compile(optimizer='adam', loss='mean_squared_error')
 model.fit(xtrain, ytrain, batch_size=1, epochs=30)
 
 
+# Fetch super test data
+# TODO: Feed back eyeball test data into system.
+date_to_search = date.today() - timedelta(days=3)
+date_to_search = date_to_search.strftime("%Y-%m-%d")
+getDataForDay('AAPL', date_to_search)
+
+
 print(
     '''
 =======================================
@@ -150,6 +142,7 @@ print(
 =======================================
 '''
 )
+
 # Test the model
 # features = [Open, High, Low, Adj Close, Volume]
 features = np.array([[177.089996, 180.419998, 177.070007, 74919600]])
