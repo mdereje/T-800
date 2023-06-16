@@ -1,151 +1,52 @@
 import numpy as np
-from keras.layers import Dense, LSTM
-from keras.models import Sequential
-from sklearn.model_selection import train_test_split
-import plotly.graph_objects as go
-import pandas as pd
-import yfinance as yf
 from datetime import date, timedelta
 from yahoo_finance_data_fetch import getDataForDay, getLastNDaysForSymbol
+from utils.print import printAsBanner
+from network import buildLSTMNetworkArch, trainLSTNetwork
+from display import createAndDisplayCandleStick
+from model import splitToTrainingAndTest
+
+symbol = 'AAPL'
+lookbackDays = 5000
 
 
-print(
-    '''
-=======================================
-|									 |
-|									 |
- Retreive and display data from yahoo
-|									 |
-|									 |
-=======================================
-'''
-)
+# Retrieve and display
+printAsBanner(
+    f"Retreive data for {symbol} for the last {lookbackDays} days from yahoo")
+data = getLastNDaysForSymbol(symbol, lookbackDays)
 
-data = getLastNDaysForSymbol('AAPL', 5000)
-# exit(0)
+printAsBanner("Launch graph as a candel stick")
+createAndDisplayCandleStick(data)
 
-print(
-    '''
-=======================================
-|									 |
-|									 |
- Launch graph as a candel stick
-|									 |
-|									 |
-=======================================
-'''
-)
-
-# Display the graph as a candle stick
-figure = go.Figure(data=[go.Candlestick(x=data["Date"], open=data["Open"],
-                   high=data["High"], low=data["Low"], close=data["Close"])])
-
-figure.update_layout(title="Apple Stock Price Analysis",
-                     xaxis_rangeslider_visible=False)
-
-figure.show()  # No need to show yet, this could be useful for other means.
-
-
-print(
-    '''
-=======================================
-|									 |
-|									 |
- look at the correlation of all cols |
-| with the close column.			 |
-|									 |
-=======================================
-'''
-)
 # Look at the correlation of all the columns with Close column
+printAsBanner("Look at the coolrelation of all cols with close column")
 correlation = data.corr()
 print(correlation["Close"].sort_values(ascending=False))
 
-
-print(
-    '''
-=======================================
-|									 |
-|									 |
- Split the data into test and traning
-|									 |
-|									 |
-=======================================
-'''
-)
 # Traning LSTM for Stock Price Prediction
-x = data[["Open", "High", "Low", "Volume"]]
-y = data["Close"]
-
-x = x.to_numpy()
-y = y.to_numpy()
-y = y.reshape(-1, 1)
-
-xtrain, xtest, ytrain, ytest = train_test_split(
-    x, y, test_size=0.2, random_state=42)  # not sure what the random_state is here.
+printAsBanner("Split the data into test and traning")
+xtrain, xtest, ytrain, ytest = splitToTrainingAndTest(data=data, traningProperties=[
+                                                      "Open", "High", "Low", "Volume"], targetProperty="Close")
 print(f"==>> xtrain: {xtrain.size}")
 print(f"==>> xtest: {xtest.size}")
 print(f"==>> ytrain: {ytrain.size}")
 print(f"==>> ytest: {ytest.size}")
 
-print(
-    '''
-=======================================
-|									 |
-|									 |
- Build the neural network archietcture
-| for LSTM  						 |
-|									 |
-=======================================
-'''
-)
 # Neural network architecture for LSTM
-model = Sequential()
-model.add(LSTM(128, return_sequences=True, input_shape=(xtrain.shape[1], 1)))
-model.add(LSTM(64, return_sequences=False))
-model.add(Dense(25))
-model.add(Dense(1))
-model.summary()
-
-print(
-    '''
-=======================================
-|									 |
-|									 |
- Train the model for set architecture|
-|               					 |
-|									 |
-=======================================
-'''
-)
+printAsBanner("Build the neural network archietcture for LSTM")
+model = buildLSTMNetworkArch(xtrain)
 
 # # Train the neural network model
-model.compile(optimizer='adam', loss='mean_squared_error')
-model.fit(xtrain, ytrain, batch_size=1, epochs=30)
+printAsBanner("Train the model for set architecture")
+trainLSTNetwork(model, xtrain, ytrain)
 
 
 # Fetch super test data
-# TODO: Feed back eyeball test data into system.
+printAsBanner(
+    "Test the model by feeding it set data data.[Open, High, Low, Volume]")
 date_to_search = date.today() - timedelta(days=3)
 date_to_search = date_to_search.strftime("%Y-%m-%d")
-getDataForDay('AAPL', date_to_search)
-
-
-# print(
-#     '''
-# =======================================
-#  Test the model by feeding it
-#  set data data.
-# [Open, High, Low, Adj Close, Volume]
-# [177.089996, 180.419998, 177.070007, 74919600]
-# =======================================
-# '''
-# )
-# Fetch super test data
-# TODO: Feed back eyeball test data into system.
-date_to_search = date.today() - timedelta(days=3)
-date_to_search = date_to_search.strftime("%Y-%m-%d")
-one_day_data = getDataForDay('AAPL', date_to_search)
+one_day_data = getDataForDay(symbol, date_to_search)
 normal_array = [one_day_data.Open.values[0], one_day_data.High.values[0],
                 one_day_data.Low.values[0], one_day_data.Volume.values[0]]
 result_as_features = np.array([normal_array])
@@ -154,7 +55,7 @@ prediction = model.predict(result_as_features)
 # Post search
 post_date_to_search = date.today() - timedelta(days=2)
 post_date_to_search = post_date_to_search.strftime("%Y-%m-%d")
-post_one_day_data = getDataForDay('AAPL', date_to_search)
+post_one_day_data = getDataForDay(symbol, date_to_search)
 print(f"test date: {date_to_search} => 'data' : {one_day_data.tail()}")
 print(f'prediction -> {prediction}')
 print(

@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 import yfinance as yf
-from time_util import addDayToStringDateAndReturnFormatted
+from utils.time import addDayToStringDateAndReturnFormatted
 
 
 def getDataForDay(symbol: str, date_to_fetch: str):
