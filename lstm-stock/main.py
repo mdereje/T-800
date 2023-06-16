@@ -21,7 +21,6 @@ print(
 '''
 )
 
-
 data = getLastNDaysForSymbol('AAPL', 5000)
 # exit(0)
 
@@ -132,18 +131,31 @@ date_to_search = date_to_search.strftime("%Y-%m-%d")
 getDataForDay('AAPL', date_to_search)
 
 
-print(
-    '''
-=======================================
- Test the model by feeding it        
- set data data.   
-[Open, High, Low, Adj Close, Volume]
-[177.089996, 180.419998, 177.070007, 74919600]
-=======================================
-'''
-)
+# print(
+#     '''
+# =======================================
+#  Test the model by feeding it
+#  set data data.
+# [Open, High, Low, Adj Close, Volume]
+# [177.089996, 180.419998, 177.070007, 74919600]
+# =======================================
+# '''
+# )
+# Fetch super test data
+# TODO: Feed back eyeball test data into system.
+date_to_search = date.today() - timedelta(days=3)
+date_to_search = date_to_search.strftime("%Y-%m-%d")
+one_day_data = getDataForDay('AAPL', date_to_search)
+normal_array = [one_day_data.Open.values[0], one_day_data.High.values[0],
+                one_day_data.Low.values[0], one_day_data.Volume.values[0]]
+result_as_features = np.array([normal_array])
 
-# Test the model
-# features = [Open, High, Low, Adj Close, Volume]
-features = np.array([[177.089996, 180.419998, 177.070007, 74919600]])
-print(f'prediction -> {model.predict(features)}')
+prediction = model.predict(result_as_features)
+# Post search
+post_date_to_search = date.today() - timedelta(days=2)
+post_date_to_search = post_date_to_search.strftime("%Y-%m-%d")
+post_one_day_data = getDataForDay('AAPL', date_to_search)
+print(f"test date: {date_to_search} => 'data' : {one_day_data.tail()}")
+print(f'prediction -> {prediction}')
+print(
+    f"actual result for date: {post_date_to_search} => 'data' : {post_one_day_data.tail()}")

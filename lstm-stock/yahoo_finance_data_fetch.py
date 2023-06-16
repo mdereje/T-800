@@ -20,8 +20,7 @@ def getDataForDay(symbol: str, date_to_fetch: str):
                  "Low", "Close", "Adj Close", "Volume"]]
     data.reset_index(drop=True, inplace=True)
 
-    print(f'retreiveing data which is -> {data.tail(n=2)}')
-    exit(0)
+    return data
 
 
 def getLastNDaysForSymbol(symbol: str, lookBackDays: str):
