@@ -25,3 +25,5 @@ LSTMs have feedback connections, unlike standard feedforward neural networks. LS
 - It uses new data to also correct itself on the next day.
 - See how to add other variables (such as twitter, news, reddit sentiment)
 - Could be an API call
+
+## Test
