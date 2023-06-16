@@ -26,4 +26,6 @@ LSTMs have feedback connections, unlike standard feedforward neural networks. LS
 - See how to add other variables (such as twitter, news, reddit sentiment)
 - Could be an API call
 
-## Test
+## Notes
+
+> "More refactoring to make it make sense a little bit more. Need to learn how to use the test data, maybe i can just feed it in the predict function. Some more steps could be to keep this running and maybe make it an api. How do you also feed in new information for the data to keep learning? I'm not sure. Lots of things, i'd like to combine the finance dataset with something like twitter or news word bubble. Maybe frequency of usage? Main thing is to keep the model imporving upon new request."
