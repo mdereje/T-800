@@ -1,7 +1,7 @@
 import numpy as np
 from datetime import date, timedelta
 from yahoo_finance_data_fetch import getDataForDay, getLastNDaysForSymbol
-from utils.print import printAsBanner
+from utils.print import printAsBanner, printJustifiedLeftRed
 from network import buildLSTMNetworkArch, trainLSTNetwork
 from display import createAndDisplayCandleStick
 from model import splitToTrainingAndTest
@@ -9,10 +9,10 @@ from model import splitToTrainingAndTest
 symbol = 'AAPL'
 lookbackDays = 5000
 
-
 # Retrieve and display
 printAsBanner(
     f"Retreive data for {symbol} for the last {lookbackDays} days from yahoo")
+
 data = getLastNDaysForSymbol(symbol, lookbackDays)
 
 printAsBanner("Launch graph as a candel stick")
@@ -52,6 +52,9 @@ normal_array = [one_day_data.Open.values[0], one_day_data.High.values[0],
 result_as_features = np.array([normal_array])
 
 prediction = model.predict(result_as_features)
+
+printJustifiedLeftRed(f"prediction = {prediction}")
+
 # Post search
 post_date_to_search = date.today() - timedelta(days=2)
 post_date_to_search = post_date_to_search.strftime("%Y-%m-%d")
